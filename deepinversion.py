@@ -8,7 +8,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import collections
-from apex import amp
+# from apex import amp
 import random
 import torch
 import torchvision.utils as vutils
@@ -65,6 +65,7 @@ class DeepInversionClass(object):
                  parameters=dict(),
                  setting_id=0,
                  jitter=30,
+                 do_clip=False,
                  criterion=None,
                  coefficients=dict(),
                  network_output_function=lambda x: x,
@@ -110,6 +111,7 @@ class DeepInversionClass(object):
 
         if "resolution" in parameters.keys():
             self.image_resolution = parameters["resolution"]
+            self.channels = parameters["channels"]
             self.random_label = parameters["random_label"]
             self.start_noise = parameters["start_noise"]
             self.detach_student = parameters["detach_student"]
@@ -134,8 +136,6 @@ class DeepInversionClass(object):
         self.criterion = criterion
 
         self.network_output_function = network_output_function
-
-        do_clip = True
 
         if "r_feature" in coefficients:
             self.bn_reg_scale = coefficients["r_feature"]
@@ -178,7 +178,6 @@ class DeepInversionClass(object):
 
     def get_images(self, net_student=None, targets=None):
         print("get_images call")
-
         net_teacher = self.net_teacher
 
         use_fp16 = self.use_fp16
@@ -195,19 +194,20 @@ class DeepInversionClass(object):
         # setup target labels
         if targets is None:
             #only works for classification now, for other tasks need to provide target vector
-            targets = torch.LongTensor([random.randint(0, 999) for _ in range(self.bs)]).to('cuda')
+            targets = torch.LongTensor([random.randint(0, 9) for _ in range(self.bs)]).to('cuda')
             if not self.random_label:
                 # preselected classes, good for ResNet50v1.5
-                targets = [1, 933, 946, 980, 25, 63, 92, 94, 107, 985, 151, 154, 207, 250, 270, 277, 283, 292, 294, 309,
-                           311,
-                           325, 340, 360, 386, 402, 403, 409, 530, 440, 468, 417, 590, 670, 817, 762, 920, 949, 963,
-                           967, 574, 487]
+                # targets = [1, 933, 946, 980, 25, 63, 92, 94, 107, 985, 151, 154, 207, 250, 270, 277, 283, 292, 294, 309,
+                #            311,
+                #            325, 340, 360, 386, 402, 403, 409, 530, 440, 468, 417, 590, 670, 817, 762, 920, 949, 963,
+                #            967, 574, 487]
+                targets = [0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9]
                 targets = torch.LongTensor(targets * (int(self.bs / len(targets)))).to('cuda')
 
         img_original = self.image_resolution
 
         data_type = torch.half if use_fp16 else torch.float
-        inputs = torch.randn((self.bs, 3, img_original, img_original), requires_grad=True, device='cuda',
+        inputs = torch.randn((self.bs, self.channels, img_original, img_original), requires_grad=True, device='cuda',
                              dtype=data_type)
 
         pooling_function = nn.modules.pooling.AvgPool2d(kernel_size=2)
@@ -234,15 +234,12 @@ class DeepInversionClass(object):
             if self.setting_id == 0:
                 #multi resolution, 2k iterations with low resolution, 1k at normal, ResNet50v1.5 works the best, ResNet50 is ok
                 optimizer = optim.Adam([inputs], lr=self.lr, betas=[0.5, 0.9], eps = 1e-8)
-                do_clip = True
             elif self.setting_id == 1:
                 #2k normal resolultion, for ResNet50v1.5; Resnet50 works as well
                 optimizer = optim.Adam([inputs], lr=self.lr, betas=[0.5, 0.9], eps = 1e-8)
-                do_clip = True
             elif self.setting_id == 2:
                 #20k normal resolution the closes to the paper experiments for ResNet50
                 optimizer = optim.Adam([inputs], lr=self.lr, betas=[0.9, 0.999], eps = 1e-8)
-                do_clip = False
 
             if use_fp16:
                 static_loss_scale = 256
@@ -276,7 +273,6 @@ class DeepInversionClass(object):
                 # forward pass
                 optimizer.zero_grad()
                 net_teacher.zero_grad()
-
                 outputs = net_teacher(inputs_jit)
                 outputs = self.network_output_function(outputs)
 
