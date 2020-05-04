@@ -23,7 +23,7 @@ from torchvision import datasets, transforms
 
 import numpy as np
 
-from apex import amp
+# from apex import amp
 
 import os
 
@@ -150,10 +150,11 @@ def run(args):
     parameters["start_noise"] = True
     parameters["detach_student"] = False
     parameters["do_flip"] = True
+    parameters["channels"] = 3
 
     parameters["do_flip"] = args.do_flip
     parameters["random_label"] = args.random_label
-    parameters["store_best_images"] = self.store_best_images
+    parameters["store_best_images"] = args.store_best_images
 
     criterion = nn.CrossEntropyLoss()
 
@@ -182,6 +183,7 @@ def run(args):
                                              setting_id=args.setting_id,
                                              bs = bs,
                                              use_fp16 = args.fp16,
+                                             do_clip=False,
                                              jitter = jitter,
                                              criterion=criterion,
                                              coefficients = coefficients,
