@@ -57,7 +57,6 @@ def get_image_prior_losses(inputs_jit):
     loss_var_l1 = loss_var_l1 * 255.0
     return loss_var_l1, loss_var_l2
 
-
 class DeepInversionClass(object):
     def __init__(self, bs=84,
                  use_fp16=True, net_teacher=None, path="./gen_images/",
@@ -129,6 +128,7 @@ class DeepInversionClass(object):
 
         self.bs = bs  # batch size
         self.use_fp16 = use_fp16
+        self.do_clip = do_clip
 
         self.save_every = 100
 
@@ -197,11 +197,11 @@ class DeepInversionClass(object):
             targets = torch.LongTensor([random.randint(0, 9) for _ in range(self.bs)]).to('cuda')
             if not self.random_label:
                 # preselected classes, good for ResNet50v1.5
-                # targets = [1, 933, 946, 980, 25, 63, 92, 94, 107, 985, 151, 154, 207, 250, 270, 277, 283, 292, 294, 309,
-                #            311,
-                #            325, 340, 360, 386, 402, 403, 409, 530, 440, 468, 417, 590, 670, 817, 762, 920, 949, 963,
-                #            967, 574, 487]
-                targets = [0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9]
+                targets = [1, 933, 946, 980, 25, 63, 92, 94, 107, 985, 151, 154, 207, 250, 270, 277, 283, 292, 294, 309,
+                           311,
+                           325, 340, 360, 386, 402, 403, 409, 530, 440, 468, 417, 590, 670, 817, 762, 920, 949, 963,
+                           967, 574, 487]
+                # targets = [0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9]
                 targets = torch.LongTensor(targets * (int(self.bs / len(targets)))).to('cuda')
 
         img_original = self.image_resolution
@@ -350,7 +350,7 @@ class DeepInversionClass(object):
                 optimizer.step()
 
                 # clip color outlayers
-                if do_clip:
+                if self.do_clip:
                     inputs.data = clip(inputs.data, use_fp16=use_fp16)
 
                 if best_cost > loss.item() or iteration == 1:
