@@ -30,12 +30,10 @@ import os
 import torchvision.models as models
 from utils import load_model_pytorch, distributed_is_initialized
 
+from resnet import *
+
 import wandb
 wandb.init(project="deepinversion")
-
-
-
-
 random.seed(0)
 
 
@@ -64,7 +62,7 @@ def validate_one(input, target, model):
     print("Verifier accuracy: ", prec1.item())
     wandb.log({"Verifier accuracy:", prec1})
 
-def run(args):
+def main():
     torch.backends.cudnn.benchmark = True
     use_fp16 = False
     torch.manual_seed(0)
@@ -95,7 +93,7 @@ def run(args):
     net_verifier.eval()
 
 
-    # from deepinversion import DeepInversionClass
+    from deepinversion import DeepInversionClass
 
     exp_name = "dream_cifar10"
     # final images will be stored here:
@@ -151,7 +149,7 @@ def run(args):
 
     torch.backends.cudnn.benchmark = True
 
-    DeepInversionEngine = DeepInversionClass(net_teacher=net,
+    DeepInversionEngine = DeepInversionClass(wandb, net_teacher=net,
                                               final_data_path=adi_data_path,
                                               path=exp_name,
                                               parameters=parameters,
@@ -162,7 +160,7 @@ def run(args):
                                               criterion=criterion,
                                               coefficients = coefficients,
                                               network_output_function = network_output_function,
-                                              hook_for_display = hook_for_display, wandb)
+                                              hook_for_display = hook_for_display)
     net_student=None
     if adi_scale != 0: 
         net_student = net_verifier

@@ -58,7 +58,7 @@ def get_image_prior_losses(inputs_jit):
     return loss_var_l1, loss_var_l2
 
 class DeepInversionClass(object):
-    def __init__(self, bs=84,
+    def __init__(self, wandb, bs=84,
                  use_fp16=True, net_teacher=None, path="./gen_images/",
                  final_data_path="/gen_images_final/",
                  parameters=dict(),
@@ -68,7 +68,7 @@ class DeepInversionClass(object):
                  criterion=None,
                  coefficients=dict(),
                  network_output_function=lambda x: x,
-                 hook_for_display = None, wandb):
+                 hook_for_display = None):
         '''
         :param bs: batch size per GPU for image generation
         :param use_fp16: use FP16 (or APEX AMP) for model inversion, uses less memory and is faster for GPUs with Tensor Cores
