@@ -74,7 +74,7 @@ def run(args):
     resnet = True
     update_generator = False
     net = resnet34(num_classes=5)
-    net.load_state_dict(torch.load('cifar10_resnet34_classifier_half.pth', map_location=torch.device(device)))
+    net.load_state_dict(torch.load('models/cifar10_resnet34_classifier_half.pth', map_location=torch.device(device)))
     net = net.to(device)
 
     ### load feature statistics
@@ -90,7 +90,7 @@ def run(args):
     net.eval()
 
     net_verifier = resnet18(num_classes=5)
-    net_verifier.load_state_dict(torch.load('cifar10_resnet18_verifier_half.pth', map_location=torch.device(device)))
+    net_verifier.load_state_dict(torch.load('models/cifar10_resnet18_verifier_half.pth', map_location=torch.device(device)))
     net_verifier.to(device)
     net_verifier.eval()
 
