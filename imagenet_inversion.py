@@ -28,7 +28,7 @@ import numpy as np
 import os
 
 import torchvision.models as models
-from utils.utils import load_model_pytorch, distributed_is_initialized
+from utils import load_model_pytorch, distributed_is_initialized
 
 
 
