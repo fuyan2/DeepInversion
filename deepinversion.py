@@ -68,7 +68,7 @@ class DeepInversionClass(object):
                  criterion=None,
                  coefficients=dict(),
                  network_output_function=lambda x: x,
-                 hook_for_display = None):
+                 hook_for_display = None, wandb):
         '''
         :param bs: batch size per GPU for image generation
         :param use_fp16: use FP16 (or APEX AMP) for model inversion, uses less memory and is faster for GPUs with Tensor Cores
@@ -99,7 +99,7 @@ class DeepInversionClass(object):
         network_output_function: function to be applied to the output of the network to get the output
 
         hook_for_display: function to be executed at every print/save call, useful to check accuracy of verifier
-
+        wandb: print output
         '''
 
         print("Deep inversion class generation")
@@ -107,7 +107,7 @@ class DeepInversionClass(object):
         torch.manual_seed(torch.cuda.current_device())
 
         self.net_teacher = net_teacher
-
+        self.wandb = wandb
         if "resolution" in parameters.keys():
             self.image_resolution = parameters["resolution"]
             self.channels = parameters["channels"]
@@ -290,7 +290,7 @@ class DeepInversionClass(object):
                 outputs = self.network_output_function(outputs)
 
                 # R_cross classification loss
-                loss = criterion(outputs, targets)
+                class_loss = criterion(outputs, targets)
 
                 # R_prior losses
                 loss_var_l1, loss_var_l2 = get_image_prior_losses(inputs_jit)
@@ -340,14 +340,18 @@ class DeepInversionClass(object):
                 if self.adi_scale!=0.0:
                     loss_aux += self.adi_scale * loss_verifier_cig
 
-                loss = self.main_loss_multiplier * loss + loss_aux
+                loss = self.main_loss_multiplier * class_loss + loss_aux
 
                 if local_rank==0:
                     if iteration % save_every==0:
                         print("------------iteration {}----------".format(iteration))
                         print("total loss", loss.item())
                         print("loss_r_feature", loss_r_feature.item())
-                        print("main criterion", criterion(outputs, targets).item())
+                        print("main criterion", class_loss.item())
+
+                        self.wandb.log({"total Loss": loss})
+                        self.wandb.log({"loss_r_feature": loss_r_feature})
+                        self.wandb.log({"class_loss:", class_loss})
 
                         if self.hook_for_display is not None:
                             self.hook_for_display(inputs, targets)
@@ -371,6 +375,7 @@ class DeepInversionClass(object):
 
                 if iteration % save_every==0 and (save_every > 0):
                     if local_rank==0:
+                        self.wandb.log({"images" : [self.wandb.Image(i) for i in inputs]})
                         vutils.save_image(inputs,
                                           '{}/best_images/output_{:05d}_gpu_{}.png'.format(self.prefix,
                                                                                            iteration // save_every,

@@ -62,7 +62,7 @@ def validate_one(input, target, model):
         prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
 
     print("Verifier accuracy: ", prec1.item())
-
+    wandb.log({"Verifier accuracy:", prec1})
 
 def run(args):
     torch.backends.cudnn.benchmark = True
@@ -162,7 +162,7 @@ def run(args):
                                               criterion=criterion,
                                               coefficients = coefficients,
                                               network_output_function = network_output_function,
-                                              hook_for_display = hook_for_display)
+                                              hook_for_display = hook_for_display, wandb)
     net_student=None
     if adi_scale != 0: 
         net_student = net_verifier
