@@ -162,7 +162,7 @@ def main():
                                               network_output_function = network_output_function,
                                               hook_for_display = hook_for_display)
     net_student=None
-    if adi_scale != 0: 
+    if wandb.config.adi_scale != 0: 
         net_student = net_verifier
     DeepInversionEngine.generate_batch(net_student=net_student)
 
