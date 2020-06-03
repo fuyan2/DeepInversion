@@ -114,7 +114,7 @@ def main():
     parameters["random_label"] = False
     parameters["start_noise"] = True
     parameters["detach_student"] = False
-
+    parameters["channels"] = 3
     parameters["do_flip"] = True
     parameters["store_best_images"] = True
 
