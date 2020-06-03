@@ -23,7 +23,8 @@ class DeepInversionFeatureHook():
     Implementation of the forward hook to track feature statistics and compute a loss on them.
     Will compute mean and variance, and will use l2 as a loss
     '''
-    def __init__(self, module):
+    def __init__(self, module, r):
+        self.r = r
         self.hook = module.register_forward_hook(self.hook_fn)
 
     def hook_fn(self, module, input, output):
@@ -37,7 +38,7 @@ class DeepInversionFeatureHook():
         r_feature = torch.norm(module.running_var.data - var, 2) + torch.norm(
             module.running_mean.data - mean, 2)
 
-        self.r_feature = r_feature
+        self.r_feature = r_feature * self.r
         # must have no output
 
     def close(self):
