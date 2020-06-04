@@ -319,6 +319,7 @@ class DeepInversionClass(object):
                 # forward pass
                 optimizer.zero_grad()
                 net_teacher.zero_grad()
+                net_student.zero_grad()
                 outputs = net_teacher(inputs_jit)
                 outputs = self.network_output_function(outputs)
 
