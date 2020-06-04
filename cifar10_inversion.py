@@ -33,7 +33,7 @@ from utils import load_model_pytorch, distributed_is_initialized
 from resnet import *
 
 import wandb
-wandb.init(project="deepinversion")
+
 random.seed(0)
 
 
@@ -64,7 +64,7 @@ def validate_one(input, target, model):
 
 def run(net, net_verifier, coefficients=dict()):
     torch.backends.cudnn.benchmark = True
-    use_fp16 = False
+    use_fp16 = False`
     torch.manual_seed(0)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -113,16 +113,15 @@ def run(net, net_verifier, coefficients=dict()):
     parameters["do_flip"] = True
     parameters["store_best_images"] = True
 
-         
+    
     criterion = nn.CrossEntropyLoss()
-    # coefficients = dict()
-    # coefficients["r_feature"] = wandb.config.r_feature
-    # coefficients["tv_l1"] = wandb.config.tv_l2 
-    # coefficients["tv_l2"] = wandb.config.l2
-    # coefficients["l2"] = wandb.config.lr
-    # coefficients["lr"] = wandb.config.lr
-    # coefficients["main_loss_multiplier"] = wandb.config.main_loss_multiplier 
-    # coefficients["adi_scale"] = wandb.config.adi_scale
+    wandb.init(project="deepinversion")
+    wandb.config.r_feature = coefficients["r_feature"]
+    wandb.config.tv_l2 = coefficients["tv_l2"] 
+    wandb.config.l2 = oefficients["l2"]
+    wandb.config.lr = coefficients["lr"]
+    wandb.config.main_loss_multiplier = coefficients["main_loss_multiplier"]
+    wandb.config.adi_scale = coefficients["adi_scale"]
 
 
     network_output_function = lambda x: x
@@ -156,21 +155,13 @@ def run(net, net_verifier, coefficients=dict()):
 
 def main():
 
-    wandb.config.r_feature = 1.
-    wandb.config.tv_l2 = 128  
-    wandb.config.l2 = 3e-8
-    wandb.config.lr = [0.1, 1e-2, 1e-3]
-    wandb.config.main_loss_multiplier = 1.
-    wandb.config.adi_scale = [10,1,0.1]
-
     train_cifar10_half = False
     if train_cifar10_half:
         net = resnet34(num_classes=5)
         net.load_state_dict(torch.load('models/cifar10_resnet34_classifier_half.pth', map_location=torch.device(device)))
     else:
         net = resnet34(pretrained=True)
-
-    # net.share_memory()
+    net.share_memory()
 
     train_cifar10_half = False
     if train_cifar10_half:
@@ -178,22 +169,31 @@ def main():
         net_verifier.load_state_dict(torch.load('models/cifar10_resnet18_verifier_half.pth', map_location=torch.device(device)))
     else:
         net_verifier = resnet18(pretrained=True)
+    net_verifier.share_memory()
 
-    # num_processes = 9
+    r_features = [1.]
+    tv_l1s = 0
+    tv_l2s = [2.5e-5] 
+    l2s = [3e-8]
+    lrs = [1e-1, 1e-2, 1e-3]
+    main_loss_multipliers = [1.] 
+    adi_scales = [10, 1, 0.1]
+
     processes = []
-    for lr  in wandb.config.lr:
-        for adi_scale in wandb.config.adi_scale:
-            coefficients = dict()
-            coefficients["r_feature"] = wandb.config.r_feature
-            coefficients["tv_l1"] = 0
-            coefficients["tv_l2"] = wandb.config.tv_l2 
-            coefficients["l2"] = wandb.config.l2
-            coefficients["lr"] = lr
-            coefficients["main_loss_multiplier"] = wandb.config.main_loss_multiplier 
-            coefficients["adi_scale"] = adi_scale
-            p = mp.Process(target=run, args=(net,net_verifier,coefficients,))
-            p.start()
-            processes.append(p)
+    for l2 in l2s:
+        for lr  in lrs:
+            for adi_scale in adi_scales:
+                coefficients = dict()
+                coefficients["r_feature"] = 1.
+                coefficients["tv_l1"] = 0
+                coefficients["tv_l2"] = tv_l2
+                coefficients["l2"] = l2
+                coefficients["lr"] = lr
+                coefficients["main_loss_multiplier"] = 1.
+                coefficients["adi_scale"] = adi_scale
+                p = mp.Process(target=run, args=(net,net_verifier,coefficients))
+                p.start()
+                processes.append(p)
 
     for p in processes:
         p.join()
