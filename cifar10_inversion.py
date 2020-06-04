@@ -69,6 +69,21 @@ def run(rank, net, net_verifier, coefficients=dict()):
 
     # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     device = torch.device("cuda:{}".format(rank))
+    
+    train_cifar10_half = False
+    if train_cifar10_half:
+        net = resnet34(num_classes=5)
+        net.load_state_dict(torch.load('models/cifar10_resnet34_classifier_half.pth', map_location=torch.device(device)))
+    else:
+        net = resnet34(pretrained=True)
+
+    train_cifar10_half = False
+    if train_cifar10_half:
+        net_verifier = resnet18(num_classes=5)
+        net_verifier.load_state_dict(torch.load('models/cifar10_resnet18_verifier_half.pth', map_location=torch.device(device)))
+    else:
+        net_verifier = resnet18(pretrained=True)
+
     resnet = True
     update_generator = False
     net = net.to(device)
@@ -154,23 +169,6 @@ def run(rank, net, net_verifier, coefficients=dict()):
 
 
 def main():
-
-    train_cifar10_half = False
-    if train_cifar10_half:
-        net = resnet34(num_classes=5)
-        net.load_state_dict(torch.load('models/cifar10_resnet34_classifier_half.pth', map_location=torch.device(device)))
-    else:
-        net = resnet34(pretrained=True)
-    net.share_memory()
-
-    train_cifar10_half = False
-    if train_cifar10_half:
-        net_verifier = resnet18(num_classes=5)
-        net_verifier.load_state_dict(torch.load('models/cifar10_resnet18_verifier_half.pth', map_location=torch.device(device)))
-    else:
-        net_verifier = resnet18(pretrained=True)
-    net_verifier.share_memory()
-
     r_features = [1.]
     tv_l1s = 0
     tv_l2s = [2.5e-5] 
