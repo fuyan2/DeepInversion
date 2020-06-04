@@ -379,7 +379,7 @@ class DeepInversionClass(object):
                 
                 example_images = []
                 for i in range(10):
-                    example_images.append(wandb.Image(inputs_jit[i], caption="Truth: {}".format(target[i])))
+                    example_images.append(self.wandb.Image(inputs_jit[i], caption="Truth: {}".format(target[i])))
 
                 self.wandb.log({
                     "total Loss": loss, 
