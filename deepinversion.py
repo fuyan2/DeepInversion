@@ -376,9 +376,18 @@ class DeepInversionClass(object):
 
                 loss = self.main_loss_multiplier * class_loss + loss_aux
                 Verifier_acc = validate_one(inputs_jit, targets, net_student)
-
-                self.wandb.log({"total Loss": loss, "feature loss": loss_r_feature, "class_loss":class_loss, "Verifier accuracy":Verifier_acc})
                 
+                example_images = []
+                for i in range(10):
+                    example_images.append(wandb.Image(inputs_jit[i], caption="Truth: {}".format(target[i])))
+
+                self.wandb.log({
+                    "total Loss": loss, 
+                    "feature loss": loss_r_feature, 
+                    "class_loss":class_loss, 
+                    "Verifier accuracy":Verifier_acc,
+                    "Examples" : example_images})
+
                 if local_rank==0:
                     if iteration % save_every==0:
                         print("------------iteration {}----------".format(iteration))
@@ -411,7 +420,6 @@ class DeepInversionClass(object):
                         path = '{}/best_images/output_{:05d}_gpu_{}.png'.format(self.prefix,iteration // save_every,local_rank)
                         vutils.save_image(inputs,path,normalize=True, scale_each=True, nrow=int(10))
                         image = Image.open(path)
-                        self.wandb.log({"images" : self.wandb.Image(image)})
 
         if self.store_best_images:
             best_inputs = denormalize(best_inputs)
