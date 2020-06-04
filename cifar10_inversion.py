@@ -62,14 +62,14 @@ def validate_one(input, target, model):
     print("Verifier accuracy: ", prec1.item())
     # return prec1
 
-def run(rank, net, net_verifier, coefficients=dict()):
+def run(rank, coefficients=dict()):
     torch.backends.cudnn.benchmark = True
     use_fp16 = False
     torch.manual_seed(0)
 
     # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     device = torch.device("cuda:{}".format(rank))
-    
+
     train_cifar10_half = False
     if train_cifar10_half:
         net = resnet34(num_classes=5)
