@@ -26,10 +26,10 @@ import numpy as np
 # from apex import amp
 
 import os
+from multiprocessing import Process
 
 import torchvision.models as models
 from utils import load_model_pytorch, distributed_is_initialized
-
 from resnet import *
 
 import wandb
@@ -71,8 +71,12 @@ def main():
 
     resnet = True
     update_generator = False
-    net = resnet34(num_classes=5)
-    net.load_state_dict(torch.load('models/cifar10_resnet34_classifier_half.pth', map_location=torch.device(device)))
+    train_cifar10_half = False
+    if train_cifar10_half:
+        net = resnet34(num_classes=5)
+        net.load_state_dict(torch.load('models/cifar10_resnet34_classifier_half.pth', map_location=torch.device(device)))
+    else:
+        net = resnet34(pretrained=True)
     net = net.to(device)
 
     ### load feature statistics
@@ -87,8 +91,13 @@ def main():
                 feature_statistics.append((std, mean))
     net.eval()
 
-    net_verifier = resnet18(num_classes=5)
-    net_verifier.load_state_dict(torch.load('models/cifar10_resnet18_verifier_half.pth', map_location=torch.device(device)))
+    train_cifar10_half = False
+    if train_cifar10_half:
+        net_verifier = resnet18(num_classes=5)
+        net_verifier.load_state_dict(torch.load('models/cifar10_resnet18_verifier_half.pth', map_location=torch.device(device)))
+    else:
+        net_verifier = resnet18(pretrained=True)
+        
     net_verifier.to(device)
     net_verifier.eval()
 
@@ -153,7 +162,7 @@ def main():
                                               final_data_path=adi_data_path,
                                               path=exp_name,
                                               parameters=parameters,
-                                              setting_id=2,
+                                              setting_id=0,
                                               bs = bs,
                                               use_fp16 = False,
                                               jitter = jitter,
