@@ -62,13 +62,13 @@ def validate_one(input, target, model):
     print("Verifier accuracy: ", prec1.item())
     # return prec1
 
-def run(net, net_verifier, coefficients=dict()):
+def run(rank, net, net_verifier, coefficients=dict()):
     torch.backends.cudnn.benchmark = True
     use_fp16 = False
     torch.manual_seed(0)
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
+    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    device = torch.device("cuda:{}".format(rank))
     resnet = True
     update_generator = False
     net = net.to(device)
@@ -115,7 +115,7 @@ def run(net, net_verifier, coefficients=dict()):
 
     
     criterion = nn.CrossEntropyLoss()
-    wandb.init(project="deepinversion")
+    wandb.init(project="cifar10_inversion")
     wandb.config.r_feature = coefficients["r_feature"]
     wandb.config.tv_l2 = coefficients["tv_l2"] 
     wandb.config.l2 = coefficients["l2"]
@@ -180,6 +180,7 @@ def main():
     adi_scales = [10, 1]
 
     processes = []
+    rank = 0
     for tv_l2 in tv_l2s:
         for l2 in l2s:
             for lr  in lrs:
@@ -192,7 +193,8 @@ def main():
                     coefficients["lr"] = lr
                     coefficients["main_loss_multiplier"] = 1.
                     coefficients["adi_scale"] = adi_scale
-                    p = mp.Process(target=run, args=(net,net_verifier,coefficients))
+                    p = mp.Process(target=run, args=(rank, net,net_verifier,coefficients))
+                    rank += 1
                     p.start()
                     processes.append(p)
 
