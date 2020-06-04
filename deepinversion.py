@@ -87,7 +87,7 @@ def get_image_prior_losses(inputs_jit):
     return loss_var_l1, loss_var_l2
 
 class DeepInversionClass(object):
-    def __init__(self, wandb, bs=84,
+    def __init__(self, wandb, device="cuda",bs=84,
                  use_fp16=True, net_teacher=None, path="./gen_images/",
                  final_data_path="/gen_images_final/",
                  parameters=dict(),
@@ -138,6 +138,7 @@ class DeepInversionClass(object):
 
         self.net_teacher = net_teacher
         self.wandb = wandb
+        self.device = device
         if "resolution" in parameters.keys():
             self.image_resolution = parameters["resolution"]
             self.channels = parameters["channels"]
@@ -238,7 +239,7 @@ class DeepInversionClass(object):
         # setup target labels
         if targets is None:
             #only works for classification now, for other tasks need to provide target vector
-            targets = torch.LongTensor([random.randint(0, 9) for _ in range(self.bs)]).to('cuda')
+            targets = torch.LongTensor([random.randint(0, 9) for _ in range(self.bs)]).to(self.device)
             if not self.random_label:
                 # preselected classes, good for ResNet50v1.5
                 # targets = [1, 933, 946, 980, 25, 63, 92, 94, 107, 985, 151, 154, 207, 250, 270, 277, 283, 292, 294, 309,
@@ -248,12 +249,12 @@ class DeepInversionClass(object):
                 # targets = [0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9]
                 targets = [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4]
                 # targets = [0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9]
-                targets = torch.LongTensor(targets * (int(self.bs / len(targets)))).to('cuda')
+                targets = torch.LongTensor(targets * (int(self.bs / len(targets)))).to(self.device)
 
         img_original = self.image_resolution
 
         data_type = torch.half if use_fp16 else torch.float
-        inputs = torch.randn((self.bs, self.channels, img_original, img_original), requires_grad=True, device='cuda',
+        inputs = torch.randn((self.bs, self.channels, img_original, img_original), requires_grad=True, device=self.device,
                              dtype=data_type)
 
         pooling_function = nn.modules.pooling.AvgPool2d(kernel_size=2)
