@@ -19,6 +19,32 @@ import numpy as np
 
 from utils import lr_cosine_policy, lr_policy, beta_policy, mom_cosine_policy, clip, denormalize, create_folder
 
+def validate_one(input, target, model):
+    """Perform validation on the validation set"""
+
+    def accuracy(output, target, topk=(1,)):
+        """Computes the precision@k for the specified values of k"""
+        maxk = max(topk)
+        batch_size = target.size(0)
+
+        _, pred = output.topk(maxk, 1, True, True)
+        pred = pred.t()
+        correct = pred.eq(target.view(1, -1).expand_as(pred))
+
+        res = []
+        for k in topk:
+            correct_k = correct[:k].view(-1).float().sum(0)
+            res.append(correct_k.mul_(100.0 / batch_size))
+        return res
+
+    with torch.no_grad():
+        output = model(input)
+        prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
+
+    print("Verifier accuracy: ", prec1.item())
+    return prec1
+
+
 class DeepInversionFeatureHook():
     '''
     Implementation of the forward hook to track feature statistics and compute a loss on them.
@@ -347,8 +373,9 @@ class DeepInversionClass(object):
                     loss_aux += self.adi_scale * loss_verifier_cig
 
                 loss = self.main_loss_multiplier * class_loss + loss_aux
+                Verifier_acc = validate_one(inputs_jit, targets, net_student)
 
-                self.wandb.log({"total Loss": loss, "feature loss": loss_r_feature, "class_loss":class_loss})
+                self.wandb.log({"total Loss": loss, "feature loss": loss_r_feature, "class_loss":class_loss, "Verifier accuracy":Verifier_acc})
                 
                 if local_rank==0:
                     if iteration % save_every==0:
@@ -359,7 +386,8 @@ class DeepInversionClass(object):
 
 
                         if self.hook_for_display is not None:
-                            self.hook_for_display(inputs, targets)
+                            # self.hook_for_display(inputs, targets)
+
 
                 # do image update
                 if use_fp16:
@@ -380,7 +408,7 @@ class DeepInversionClass(object):
 
                 if iteration % save_every==0 and (save_every > 0):
                     if local_rank==0:
-                        self.wandb.log({"images" : [self.wandb.Image(i) for i in inputs]})
+                        # self.wandb.log({"images" : [self.wandb.Image(i) for i in inputs]})
                         vutils.save_image(inputs,
                                           '{}/best_images/output_{:05d}_gpu_{}.png'.format(self.prefix,
                                                                                            iteration // save_every,
