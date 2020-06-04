@@ -64,7 +64,7 @@ def validate_one(input, target, model):
 
 def run(net, net_verifier, coefficients=dict()):
     torch.backends.cudnn.benchmark = True
-    use_fp16 = False`
+    use_fp16 = False
     torch.manual_seed(0)
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -180,20 +180,21 @@ def main():
     adi_scales = [10, 1, 0.1]
 
     processes = []
-    for l2 in l2s:
-        for lr  in lrs:
-            for adi_scale in adi_scales:
-                coefficients = dict()
-                coefficients["r_feature"] = 1.
-                coefficients["tv_l1"] = 0
-                coefficients["tv_l2"] = tv_l2
-                coefficients["l2"] = l2
-                coefficients["lr"] = lr
-                coefficients["main_loss_multiplier"] = 1.
-                coefficients["adi_scale"] = adi_scale
-                p = mp.Process(target=run, args=(net,net_verifier,coefficients))
-                p.start()
-                processes.append(p)
+    for tv_l2 in tv_l2s:
+        for l2 in l2s:
+            for lr  in lrs:
+                for adi_scale in adi_scales:
+                    coefficients = dict()
+                    coefficients["r_feature"] = 1.
+                    coefficients["tv_l1"] = 0
+                    coefficients["tv_l2"] = tv_l2
+                    coefficients["l2"] = l2
+                    coefficients["lr"] = lr
+                    coefficients["main_loss_multiplier"] = 1.
+                    coefficients["adi_scale"] = adi_scale
+                    p = mp.Process(target=run, args=(net,net_verifier,coefficients))
+                    p.start()
+                    processes.append(p)
 
     for p in processes:
         p.join()
