@@ -13,6 +13,7 @@ import random
 import torch
 import torchvision.utils as vutils
 from PIL import Image
+import os 
 
 import numpy as np
 
@@ -104,6 +105,7 @@ class DeepInversionClass(object):
         '''
 
         print("Deep inversion class generation")
+        print("current process id: ", os.getpid())
         # for reproducibility
         torch.manual_seed(torch.cuda.current_device())
 
