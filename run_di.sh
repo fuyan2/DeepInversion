@@ -1,9 +1,9 @@
 #!/bin/bash
 #SBATCH -N 1
-#SBATCH --gres=gpu:1
-#SBATCH -p gpu
-#SBATCH --cpus-per-task=1
-#SBATCH --time=60:00:00
+#SBATCH --gres=gpu:4
+#SBATCH -p t4
+#SBATCH --cpus-per-gpu=2
+#SBATCH --time=2:00:00
 #SBATCH --mem=16GB
 #SBATCH --job-name=deepinversion
 #SBATCH --output=log_%j.out
