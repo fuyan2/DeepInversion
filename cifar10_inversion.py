@@ -26,7 +26,7 @@ import numpy as np
 # from apex import amp
 
 import os
-from multiprocessing import Process
+import torch.multiprocessing as mp
 
 import torchvision.models as models
 from utils import load_model_pytorch, distributed_is_initialized
