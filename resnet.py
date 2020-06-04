@@ -201,7 +201,7 @@ def _resnet(arch, block, layers, pretrained, progress, device,num_classes=10, **
     model = ResNet(block, layers, num_classes=num_classes, **kwargs)
     if pretrained:
         script_dir = os.path.dirname(__file__)
-        state_dict = torch.load(script_dir + '/'+arch+'.pt', map_location=device)
+        state_dict = torch.load(script_dir + '/models/'+arch+'.pt', map_location=device)
         model.load_state_dict(state_dict)
     return model
 
