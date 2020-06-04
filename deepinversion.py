@@ -384,10 +384,8 @@ class DeepInversionClass(object):
                         print("loss_r_feature", loss_r_feature.item())
                         print("main criterion", class_loss.item())
 
-
                         if self.hook_for_display is not None:
-                            # self.hook_for_display(inputs, targets)
-
+                            self.hook_for_display(inputs, targets)
 
                 # do image update
                 if use_fp16:
