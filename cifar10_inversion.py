@@ -185,9 +185,9 @@ def main():
         for adi_scale in wandb.config.adi_scale:
             coefficients = dict()
             coefficients["r_feature"] = wandb.config.r_feature
-            coefficients["tv_l1"] = wandb.config.tv_l2 
-            coefficients["tv_l2"] = wandb.config.l2
-            coefficients["l2"] = wandb.config.lr
+            coefficients["tv_l1"] = 0
+            coefficients["tv_l2"] = wandb.config.tv_l2 
+            coefficients["l2"] = wandb.config.l2
             coefficients["lr"] = lr
             coefficients["main_loss_multiplier"] = wandb.config.main_loss_multiplier 
             coefficients["adi_scale"] = adi_scale
