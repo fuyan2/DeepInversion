@@ -346,6 +346,8 @@ class DeepInversionClass(object):
 
                 loss = self.main_loss_multiplier * class_loss + loss_aux
 
+                self.wandb.log({"total Loss": loss, "feature loss": loss_r_feature, "class_loss":class_loss})
+                
                 if local_rank==0:
                     if iteration % save_every==0:
                         print("------------iteration {}----------".format(iteration))
@@ -353,9 +355,6 @@ class DeepInversionClass(object):
                         print("loss_r_feature", loss_r_feature.item())
                         print("main criterion", class_loss.item())
 
-                        self.wandb.log({"total Loss": loss})
-                        self.wandb.log({"loss_r_feature": loss_r_feature})
-                        self.wandb.log({"class_loss:", class_loss})
 
                         if self.hook_for_display is not None:
                             self.hook_for_display(inputs, targets)

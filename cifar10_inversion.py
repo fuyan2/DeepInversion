@@ -60,7 +60,7 @@ def validate_one(input, target, model):
         prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
 
     print("Verifier accuracy: ", prec1.item())
-    wandb.log({"Verifier accuracy:", prec1})
+    #wandb.log({"Verifier accuracy:", prec1})
 
 def main():
     torch.backends.cudnn.benchmark = True
