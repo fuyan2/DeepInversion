@@ -2,7 +2,7 @@
 #SBATCH -N 1
 #SBATCH --gres=gpu:4
 #SBATCH -p t4
-#SBATCH --cpus-per-gpu=2
+#SBATCH --cpus-per-gpu=1
 #SBATCH --time=2:00:00
 #SBATCH --mem=16GB
 #SBATCH --job-name=deepinversion
