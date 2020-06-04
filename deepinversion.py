@@ -18,6 +18,7 @@ import os
 import numpy as np
 
 from utils import lr_cosine_policy, lr_policy, beta_policy, mom_cosine_policy, clip, denormalize, create_folder
+from PIL import Image
 
 def validate_one(input, target, model):
     """Perform validation on the validation set"""
@@ -406,12 +407,10 @@ class DeepInversionClass(object):
 
                 if iteration % save_every==0 and (save_every > 0):
                     if local_rank==0:
-                        # self.wandb.log({"images" : [self.wandb.Image(i) for i in inputs]})
-                        vutils.save_image(inputs,
-                                          '{}/best_images/output_{:05d}_gpu_{}.png'.format(self.prefix,
-                                                                                           iteration // save_every,
-                                                                                           local_rank),
-                                          normalize=True, scale_each=True, nrow=int(10))
+                        path = '{}/best_images/output_{:05d}_gpu_{}.png'.format(self.prefix,iteration // save_every,local_rank)
+                        vutils.save_image(inputs,path,normalize=True, scale_each=True, nrow=int(10))
+                        image = Image.open(path)
+                        self.wandb.log({"images" : self.wandb.Image(image)})
 
         if self.store_best_images:
             best_inputs = denormalize(best_inputs)
