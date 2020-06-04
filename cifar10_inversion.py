@@ -191,7 +191,7 @@ def main():
                     coefficients["lr"] = lr
                     coefficients["main_loss_multiplier"] = 1.
                     coefficients["adi_scale"] = adi_scale
-                    p = mp.Process(target=run, args=(rank, net,net_verifier,coefficients))
+                    p = mp.Process(target=run, args=(rank, coefficients))
                     rank += 1
                     p.start()
                     processes.append(p)
