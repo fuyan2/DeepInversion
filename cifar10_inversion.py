@@ -150,7 +150,7 @@ def main():
     l2s = [3e-8]
     lrs = [1e-1,1e-2]#[1e-1, 1e-2, 1e-3]
     main_loss_multipliers = [1.] 
-    adi_scales = [10,0.1, 0.01]
+    adi_scales = [0.1, 0.01]
 
     processes = []
     rank = 0
