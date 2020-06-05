@@ -387,7 +387,7 @@ class DeepInversionClass(object):
                     "feature loss": loss_r_feature, 
                     "class_loss":class_loss, 
                     "Verifier accuracy":Verifier_acc,
-                    "Examples" : [wandb.Image(i) for i in inputs_jit]})
+                    "Examples" : [self.wandb.Image(i) for i in inputs_jit]})
 
                 if local_rank==0:
                     if iteration % save_every==0:
