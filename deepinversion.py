@@ -378,16 +378,16 @@ class DeepInversionClass(object):
                 loss = self.main_loss_multiplier * class_loss + loss_aux
                 Verifier_acc = validate_one(inputs_jit, targets, net_student)
                 
-                example_images = []
-                for i in range(10):
-                    example_images.append(self.wandb.Image(inputs_jit[i], caption="Truth: {}".format(targets[i])))
+                # example_images = []
+                # for i in range(10):
+                #     example_images.append(self.wandb.Image(inputs_jit[i], caption="Truth: {}".format(targets[i])))
 
                 self.wandb.log({
                     "total Loss": loss, 
                     "feature loss": loss_r_feature, 
                     "class_loss":class_loss, 
                     "Verifier accuracy":Verifier_acc,
-                    "Examples" : example_images})
+                    "Examples" : [wandb.Image(i) for i in inputs_jit]})
 
                 if local_rank==0:
                     if iteration % save_every==0:
