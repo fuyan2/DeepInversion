@@ -86,7 +86,7 @@ def get_image_prior_losses(inputs_jit):
     return loss_var_l1, loss_var_l2
 
 class DeepInversionClass(object):
-    def __init__(self, wandb, device="cuda",bs=84,
+    def __init__(self, wandb, rank,bs=84,
                  use_fp16=True, net_teacher=None, path="./gen_images/",
                  final_data_path="/gen_images_final/",
                  parameters=dict(),
@@ -137,7 +137,8 @@ class DeepInversionClass(object):
 
         self.net_teacher = net_teacher
         self.wandb = wandb
-        self.device = device
+        self.rank = rank
+        self.device = torch.device("cuda:{}".format(rank))
         if "resolution" in parameters.keys():
             self.image_resolution = parameters["resolution"]
             self.channels = parameters["channels"]
@@ -395,7 +396,7 @@ class DeepInversionClass(object):
                         print("loss_r_feature", loss_r_feature.item())
                         print("main criterion", class_loss.item())
                         print("verifier acc", Verifier_acc.item())
-                        
+
                 # do image update
                 if use_fp16:
                     # optimizer.backward(loss)
@@ -414,10 +415,11 @@ class DeepInversionClass(object):
                     best_inputs = inputs.data.clone()
 
                 if iteration % save_every==0 and (save_every > 0):
-                    if local_rank==0:
-                        path = '{}/best_images/output_{:05d}_gpu_{}.png'.format(self.prefix,iteration // save_every,local_rank)
-                        vutils.save_image(inputs,path,normalize=True, scale_each=True, nrow=int(10))
-                        image = Image.open(path)
+                    vutils.save_image(inputs,
+                                      '{}/best_images/output_{:05d}_gpu_{}.png'.format(self.prefix,
+                                                                                       iteration // save_every,
+                                                                                       self.rank),
+                                      normalize=True, scale_each=True, nrow=int(10))
 
         if self.store_best_images:
             best_inputs = denormalize(best_inputs)
