@@ -293,13 +293,13 @@ class DeepInversionClass(object):
                 static_loss_scale = "dynamic"
                 _, optimizer = amp.initialize([], optimizer, opt_level="O2", loss_scale=static_loss_scale)
 
-            lr_scheduler = lr_cosine_policy(self.lr, 100, iterations_per_layer)
+            # lr_scheduler = lr_cosine_policy(self.lr, 100, iterations_per_layer)
 
             for iteration_loc in range(iterations_per_layer):
                 iteration += 1
 
                 # learning rate scheduling
-                lr_scheduler(optimizer, iteration_loc, iteration_loc)
+                # lr_scheduler(optimizer, iteration_loc, iteration_loc)
 
                 # perform downsampling if needed
                 if lower_res!=1:
