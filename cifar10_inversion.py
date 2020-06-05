@@ -148,9 +148,9 @@ def main():
     tv_l1s = 0
     tv_l2s = [2.5e-5] 
     l2s = [3e-8]
-    lrs = [1e-1, 0.05]#[1e-1, 1e-2, 1e-3]
+    lrs = [0.5, 0.05]#[1e-1, 1e-2, 1e-3]
     main_loss_multipliers = [1.] 
-    adi_scales = [10, 0.1]
+    adi_scales = [5,1]
 
     processes = []
     rank = 0
