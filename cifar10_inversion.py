@@ -30,37 +30,12 @@ import torch.multiprocessing as mp
 
 import torchvision.models as models
 from utils import load_model_pytorch, distributed_is_initialized
+from deepinversion import validate_one
 from resnet import *
 
 import wandb
 
 random.seed(0)
-
-
-def validate_one(input, target, model):
-    """Perform validation on the validation set"""
-
-    def accuracy(output, target, topk=(1,)):
-        """Computes the precision@k for the specified values of k"""
-        maxk = max(topk)
-        batch_size = target.size(0)
-
-        _, pred = output.topk(maxk, 1, True, True)
-        pred = pred.t()
-        correct = pred.eq(target.view(1, -1).expand_as(pred))
-
-        res = []
-        for k in topk:
-            correct_k = correct[:k].view(-1).float().sum(0)
-            res.append(correct_k.mul_(100.0 / batch_size))
-        return res
-
-    with torch.no_grad():
-        output = model(input)
-        prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
-
-    print("Verifier accuracy: ", prec1.item())
-    # return prec1
 
 def run(rank, coefficients=dict()):
     torch.backends.cudnn.benchmark = True
@@ -173,9 +148,9 @@ def main():
     tv_l1s = 0
     tv_l2s = [2.5e-5] 
     l2s = [3e-8]
-    lrs = [1e-1, 1e-2]#[1e-1, 1e-2, 1e-3]
+    lrs = [1e-1,1e-2,1e-3]#[1e-1, 1e-2, 1e-3]
     main_loss_multipliers = [1.] 
-    adi_scales = [10, 1]
+    adi_scales = [0.1, 0.01]
 
     processes = []
     rank = 0

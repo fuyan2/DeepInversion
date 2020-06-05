@@ -42,7 +42,6 @@ def validate_one(input, target, model):
         output = model(input)
         prec1, prec5 = accuracy(output.data, target, topk=(1, 5))
 
-    print("Verifier accuracy: ", prec1.item())
     return prec1
 
 
@@ -247,8 +246,8 @@ class DeepInversionClass(object):
                 #            325, 340, 360, 386, 402, 403, 409, 530, 440, 468, 417, 590, 670, 817, 762, 920, 949, 963,
                 #            967, 574, 487]
                 # targets = [0,0,0,0,1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4,5,5,5,5,6,6,6,6,7,7,7,7,8,8,8,8,9,9,9,9]
-                targets = [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4]
-                # targets = [0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9]
+                # targets = [0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4]
+                targets = [0,0,0,0,0,1,1,1,1,1,2,2,2,2,2,3,3,3,3,3,4,4,4,4,4,5,5,5,5,5,6,6,6,6,6,7,7,7,7,7,8,8,8,8,8,9,9,9,9,9]
                 targets = torch.LongTensor(targets * (int(self.bs / len(targets)))).to(self.device)
 
         img_original = self.image_resolution
@@ -395,10 +394,8 @@ class DeepInversionClass(object):
                         print("total loss", loss.item())
                         print("loss_r_feature", loss_r_feature.item())
                         print("main criterion", class_loss.item())
-
-                        if self.hook_for_display is not None:
-                            self.hook_for_display(inputs, targets)
-
+                        print("verifier acc", Verifier_acc.item())
+                        
                 # do image update
                 if use_fp16:
                     # optimizer.backward(loss)
