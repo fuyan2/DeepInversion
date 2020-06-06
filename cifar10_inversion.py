@@ -49,14 +49,11 @@ def run(rank, coefficients=dict()):
     if train_cifar10_half:
         net = resnet34(num_classes=5)
         net.load_state_dict(torch.load('models/cifar10_resnet34_classifier_half.pth', map_location=torch.device(device)))
-    else:
-        net = resnet34(pretrained=True)
-
-    train_cifar10_half = False
-    if train_cifar10_half:
         net_verifier = resnet18(num_classes=5)
         net_verifier.load_state_dict(torch.load('models/cifar10_resnet18_verifier_half.pth', map_location=torch.device(device)))
+
     else:
+        net = resnet34(pretrained=True)
         net_verifier = resnet18(pretrained=True)
 
     resnet = True
@@ -129,7 +126,7 @@ def run(rank, coefficients=dict()):
                                               final_data_path=adi_data_path,
                                               path=exp_name,
                                               parameters=parameters,
-                                              setting_id=1,
+                                              setting_id=2,
                                               bs = bs,
                                               use_fp16 = False,
                                               jitter = jitter,
@@ -148,9 +145,9 @@ def main():
     tv_l1s = 0
     tv_l2s = [2.5e-5] 
     l2s = [3e-8]
-    lrs = [0.5, 0.05]#[1e-1, 1e-2, 1e-3]
+    lrs = [0.1, 0.01]#[1e-1, 1e-2, 1e-3]
     main_loss_multipliers = [1.] 
-    adi_scales = [5,1]
+    adi_scales = [1, 0.1]
 
     processes = []
     rank = 0
