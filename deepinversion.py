@@ -198,16 +198,16 @@ class DeepInversionClass(object):
 
         ## Create hooks for feature statistics
         self.loss_r_feature_layers = []
-        cifar10_resnet = False
+        cifar10_resnet = True
         r = 500.
         for module in  self.net_teacher.modules():
             if cifar10_resnet:
                 if module in self.net_teacher.layer1.modules():
-                    r = 100.
+                    r = self.bn_reg_scale**3#100.
                 elif module in self.net_teacher.layer2.modules():
-                    r = 10.
+                    r = self.bn_reg_scale**2#10.
                 elif module in self.net_teacher.layer3.modules():
-                    r = 5.
+                    r = self.bn_reg_scale#5.
                 elif module in self.net_teacher.layer4.modules():
                     r = 1.
                 else:

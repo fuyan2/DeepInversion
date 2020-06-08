@@ -141,13 +141,13 @@ def run(rank, coefficients=dict()):
 
 
 def main():
-    r_features = [1.]
+    r_features = [2., 3., 4., 5.]
     tv_l1s = 0
     tv_l2s = [2.5e-5] 
     l2s = [3e-8]
     lrs = [0.1]#[1e-1, 1e-2, 1e-3]
     main_loss_multipliers = [1.] 
-    adi_scales = [0.1, 0.01, 0.001]
+    adi_scales = [0.001]
 
     processes = []
     rank = 0
@@ -155,18 +155,19 @@ def main():
         for l2 in l2s:
             for lr  in lrs:
                 for adi_scale in adi_scales:
-                    coefficients = dict()
-                    coefficients["r_feature"] = 1.
-                    coefficients["tv_l1"] = 0
-                    coefficients["tv_l2"] = tv_l2
-                    coefficients["l2"] = l2
-                    coefficients["lr"] = lr
-                    coefficients["main_loss_multiplier"] = 1.
-                    coefficients["adi_scale"] = adi_scale
-                    p = mp.Process(target=run, args=(rank, coefficients))
-                    rank += 1
-                    p.start()
-                    processes.append(p)
+                    for r_feature in r_features:
+                        coefficients = dict()
+                        coefficients["r_feature"] = r_feature
+                        coefficients["tv_l1"] = 0
+                        coefficients["tv_l2"] = tv_l2
+                        coefficients["l2"] = l2
+                        coefficients["lr"] = lr
+                        coefficients["main_loss_multiplier"] = 1.
+                        coefficients["adi_scale"] = adi_scale
+                        p = mp.Process(target=run, args=(rank, coefficients))
+                        rank += 1
+                        p.start()
+                        processes.append(p)
 
     for p in processes:
         p.join()
