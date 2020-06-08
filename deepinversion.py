@@ -198,7 +198,7 @@ class DeepInversionClass(object):
 
         ## Create hooks for feature statistics
         self.loss_r_feature_layers = []
-        cifar10_resnet = True
+        cifar10_resnet = False
         r = 500.
         for module in  self.net_teacher.modules():
             if cifar10_resnet:
@@ -213,7 +213,7 @@ class DeepInversionClass(object):
                 else:
                     r = 1.0
             else:
-                r = r/5.
+                r = 1.
             if isinstance(module, nn.BatchNorm2d):
                 self.loss_r_feature_layers.append(DeepInversionFeatureHook(module, r))
 
