@@ -158,7 +158,7 @@ def main():
                     for r_feature in r_features:
                         coefficients = dict()
                         coefficients["r_feature"] = r_feature
-                        coefficients["tv_l1"] = 0
+                        coefficients["tv_l1"] = tv_l2
                         coefficients["tv_l2"] = tv_l2
                         coefficients["l2"] = l2
                         coefficients["lr"] = lr
