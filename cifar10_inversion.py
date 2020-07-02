@@ -124,6 +124,7 @@ def run(rank, coefficients=dict()):
 
     DeepInversionEngine = DeepInversionClass(wandb, rank,net_teacher=net,
                                               final_data_path=adi_data_path,
+                                              fid_images_path=
                                               path=exp_name,
                                               parameters=parameters,
                                               setting_id=2,
@@ -141,7 +142,7 @@ def run(rank, coefficients=dict()):
 
 
 def main():
-    r_features = [2., 3., 4., 5.]
+    r_features = [5.]
     tv_l1s = 0
     tv_l2s = [2.5e-5] 
     l2s = [3e-8]
