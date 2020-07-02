@@ -89,6 +89,7 @@ class DeepInversionClass(object):
     def __init__(self, wandb, rank,bs=84,
                  use_fp16=True, net_teacher=None, path="./gen_images/",
                  final_data_path="/gen_images_final/",
+                 fid_images_path='.',
                  parameters=dict(),
                  setting_id=0,
                  jitter=30,
@@ -134,7 +135,7 @@ class DeepInversionClass(object):
         print("current process id: ", os.getpid())
         # for reproducibility
         torch.manual_seed(torch.cuda.current_device())
-
+        self.fid_images_path = fid_images_path
         self.net_teacher = net_teacher
         self.wandb = wandb
         self.rank = rank
@@ -416,10 +417,13 @@ class DeepInversionClass(object):
 
                 if iteration % save_every==0 and (save_every > 0):
                     vutils.save_image(inputs,
-                                      '{}/best_images/output_{:05d}_gpu_{}.png'.format(self.prefix,
+                                      '{}/output_{:05d}_gpu_{}.png'.format(self.prefix,
                                                                                        iteration // save_every,
                                                                                        self.rank),
                                       normalize=True, scale_each=True, nrow=int(10))
+
+        for i in range(self.ny*10):
+            save_image(inputs[i], '%s/image%d.png'%(self.final_data_path,i),normalize=True)
 
         if self.store_best_images:
             best_inputs = denormalize(best_inputs)
@@ -427,7 +431,7 @@ class DeepInversionClass(object):
 
         # to reduce memory consumption by states of the optimizer we deallocate memory
         optimizer.state = collections.defaultdict(dict)
-
+        
     def save_images(self, images, targets):
         # method to store generated images locally
         local_rank = torch.cuda.current_device()
