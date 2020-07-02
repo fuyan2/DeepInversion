@@ -37,14 +37,12 @@ import wandb
 
 random.seed(0)
 
-def run(rank, coefficients=dict()):
+def run(coefficients):
     torch.backends.cudnn.benchmark = True
     use_fp16 = False
     torch.manual_seed(0)
 
-    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    device = torch.device("cuda:{}".format(rank))
-
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     train_cifar10_half = False
     if train_cifar10_half:
         net = resnet34(num_classes=5)
@@ -103,12 +101,12 @@ def run(rank, coefficients=dict()):
     
     criterion = nn.CrossEntropyLoss()
     wandb.init(project="cifar10_inversion")
-    wandb.config.r_feature = coefficients["r_feature"]
-    wandb.config.tv_l2 = coefficients["tv_l2"] 
-    wandb.config.l2 = coefficients["l2"]
-    wandb.config.lr = coefficients["lr"]
-    wandb.config.main_loss_multiplier = coefficients["main_loss_multiplier"]
-    wandb.config.adi_scale = coefficients["adi_scale"]
+    wandb.config.r_feature = coefficients.r_feature
+    wandb.config.tv_l2 = coefficients.tv_l2
+    wandb.config.l2 = coefficients.l2
+    wandb.config.lr = coefficients.lr
+    wandb.config.main_loss_multiplier = coefficients.main_loss_multiplier
+    wandb.config.adi_scale = coefficients.adi_scale
 
 
     network_output_function = lambda x: x
@@ -135,47 +133,26 @@ def run(rank, coefficients=dict()):
                                               network_output_function = network_output_function,
                                               hook_for_display = hook_for_display)
     net_student=None
-    if wandb.config.adi_scale != 0: 
+    if coefficients.adi_scale != 0: 
         net_student = net_verifier
     DeepInversionEngine.generate_batch(net_student=net_student)
 
 
-def main():
-    r_features = [5.]
-    tv_l1s = 0
-    tv_l2s = [2.5e-5] 
-    l2s = [3e-8]
-    lrs = [0.1]#[1e-1, 1e-2, 1e-3]
-    main_loss_multipliers = [1.] 
-    adi_scales = [0.001]
-
-    processes = []
-    rank = 0
-    for tv_l2 in tv_l2s:
-        for l2 in l2s:
-            for lr  in lrs:
-                for adi_scale in adi_scales:
-                    for r_feature in r_features:
-                        coefficients = dict()
-                        coefficients["r_feature"] = r_feature
-                        coefficients["tv_l1"] = tv_l2
-                        coefficients["tv_l2"] = tv_l2
-                        coefficients["l2"] = l2
-                        coefficients["lr"] = lr
-                        coefficients["main_loss_multiplier"] = 1.
-                        coefficients["adi_scale"] = adi_scale
-                        p = mp.Process(target=run, args=(rank, coefficients))
-                        rank += 1
-                        p.start()
-                        processes.append(p)
-
-    for p in processes:
-        p.join()
-
-
-
-
-
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--r_feature', default=5, type=float)
+    parser.add_argument('--tv_l1', default=0, type=float)
+    parser.add_argument('--tv_l2', default=2.5e-5, type=float)
+    parser.add_argument('--l2', default=3e-8, type=float)
+    parser.add_argument('--lr', default=0.1, type=float)
+    parser.add_argument('--main_loss_multiplier', default=1, type=float)
+    parser.add_argument('--adi_scale', default=0.001, type=float)
+    parser.add_argument('--resolution', default=32, type=int)
+    parser.add_argument('--output_folder', type=str)
+    parser.add_argument('--gan_location', type=str)
+    parser.add_argument('--checkpoint_folder', type=str)
+    parser.add_argument('--decay',default=1e-5, type=float)
+    args = parser.parse_args()
+    
+    run(args)
 

@@ -170,13 +170,13 @@ class DeepInversionClass(object):
         self.network_output_function = network_output_function
 
         if "r_feature" in coefficients:
-            self.bn_reg_scale = coefficients["r_feature"]
-            self.var_scale_l1 = coefficients["tv_l1"]
-            self.var_scale_l2 = coefficients["tv_l2"]
-            self.l2_scale = coefficients["l2"]
-            self.lr = coefficients["lr"]
-            self.main_loss_multiplier = coefficients["main_loss_multiplier"]
-            self.adi_scale = coefficients["adi_scale"]
+            self.bn_reg_scale = coefficients.r_feature
+            self.var_scale_l1 = coefficients.tv_l1
+            self.var_scale_l2 = coefficients.tv_l2
+            self.l2_scale = coefficients.l2
+            self.lr = coefficients.lr
+            self.main_loss_multiplier = coefficients.main_loss_multiplier
+            self.adi_scale = coefficients.adi_scale
         else:
             print("Provide a dictionary with ")
 
