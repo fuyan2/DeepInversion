@@ -86,7 +86,7 @@ def get_image_prior_losses(inputs_jit):
     return loss_var_l1, loss_var_l2
 
 class DeepInversionClass(object):
-    def __init__(self, wandb, rank,bs=84,
+    def __init__(self, wandb, rank=0,bs=84,
                  use_fp16=True, net_teacher=None, path="./gen_images/",
                  final_data_path="/gen_images_final/",
                  fid_images_path='.',
