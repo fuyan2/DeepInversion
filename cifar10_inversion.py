@@ -120,7 +120,7 @@ def run(coefficients):
 
     torch.backends.cudnn.benchmark = True
 
-    DeepInversionEngine = DeepInversionClass(wandb, rank,net_teacher=net,
+    DeepInversionEngine = DeepInversionClass(wandb, rank=0,net_teacher=net,
                                               final_data_path=adi_data_path,
                                               path=exp_name,
                                               parameters=parameters,
