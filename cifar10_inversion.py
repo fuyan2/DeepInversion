@@ -77,9 +77,9 @@ def run(coefficients):
 
     exp_name = "dream_cifar10"
     # final images will be stored here:
-    adi_data_path = "./final_images/%s"%exp_name
+    adi_data_path = "%s/final_images/%s"%(coefficients.output_folder,exp_name)
     # temporal data and generations will be stored here
-    exp_name = "generations/%s"%exp_name
+    exp_name = "%s/generations/%s"%(coefficients.output_folder,exp_name)
 
     iterations = 10000
     start_noise = True
