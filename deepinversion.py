@@ -272,7 +272,7 @@ class DeepInversionClass(object):
             else:
                 iterations_per_layer = 1000 if not skipfirst else 2000
                 if self.setting_id == 2:
-                    iterations_per_layer = 20000
+                    iterations_per_layer = 10000
 
             if lr_it==0 and skipfirst:
                 continue

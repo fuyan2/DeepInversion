@@ -100,13 +100,13 @@ def run(coefficients):
 
     
     criterion = nn.CrossEntropyLoss()
-    wandb.init(project="cifar10_inversion")
-    wandb.config.r_feature = coefficients.r_feature
-    wandb.config.tv_l2 = coefficients.tv_l2
-    wandb.config.l2 = coefficients.l2
-    wandb.config.lr = coefficients.lr
-    wandb.config.main_loss_multiplier = coefficients.main_loss_multiplier
-    wandb.config.adi_scale = coefficients.adi_scale
+    # wandb.init(project="cifar10_inversion")
+    # wandb.config.r_feature = coefficients.r_feature
+    # wandb.config.tv_l2 = coefficients.tv_l2
+    # wandb.config.l2 = coefficients.l2
+    # wandb.config.lr = coefficients.lr
+    # wandb.config.main_loss_multiplier = coefficients.main_loss_multiplier
+    # wandb.config.adi_scale = coefficients.adi_scale
 
 
     network_output_function = lambda x: x
@@ -120,7 +120,7 @@ def run(coefficients):
 
     torch.backends.cudnn.benchmark = True
 
-    DeepInversionEngine = DeepInversionClass(wandb, rank=0,net_teacher=net,
+    DeepInversionEngine = DeepInversionClass(wandb=None, rank=0,net_teacher=net,
                                               final_data_path=adi_data_path,
                                               path=exp_name,
                                               parameters=parameters,
