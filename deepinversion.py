@@ -422,9 +422,9 @@ class DeepInversionClass(object):
                                                                                        self.rank),
                                       normalize=True, scale_each=True, nrow=int(10))
 
-        for i in range(self.ny*10):
-            vutils.save_image(inputs[i], '%s/image%d.png'%(self.final_data_path,i),normalize=True)
-
+        for i in range(50):
+            vutils.save_image(inputs[i], '%s/best_images/image%d.png'%(self.prefix,i),normalize=True)
+        print("saved fid images")
         if self.store_best_images:
             best_inputs = denormalize(best_inputs)
             self.save_images(best_inputs, targets)
