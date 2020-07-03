@@ -272,7 +272,7 @@ class DeepInversionClass(object):
             else:
                 iterations_per_layer = 1000 if not skipfirst else 2000
                 if self.setting_id == 2:
-                    iterations_per_layer = 10000
+                    iterations_per_layer = 3000 #20000
 
             if lr_it==0 and skipfirst:
                 continue
@@ -422,9 +422,9 @@ class DeepInversionClass(object):
                                                                                        self.rank),
                                       normalize=True, scale_each=True, nrow=int(10))
 
-        for i in range(50):
-            vutils.save_image(inputs[i], '%s/best_images/image%d.png'%(self.prefix,i),normalize=True)
-        print("saved fid images")
+            for i in range(self.ny*10):
+                vutils.save_image(inputs[i], '%s/best_images/image%d.png'%(self.prefix,i),normalize=True)
+            print("saved fid images")
         if self.store_best_images:
             best_inputs = denormalize(best_inputs)
             self.save_images(best_inputs, targets)
