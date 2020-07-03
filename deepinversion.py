@@ -383,12 +383,12 @@ class DeepInversionClass(object):
                 # for i in range(10):
                 #     example_images.append(self.wandb.Image(inputs_jit[i], caption="Truth: {}".format(targets[i])))
 
-                self.wandb.log({
-                    "total Loss": loss, 
-                    "feature loss": loss_r_feature, 
-                    "class_loss":class_loss, 
-                    "Verifier accuracy":Verifier_acc,
-                    "Examples" : [self.wandb.Image(i) for i in inputs]})
+                # self.wandb.log({
+                #     "total Loss": loss, 
+                #     "feature loss": loss_r_feature, 
+                #     "class_loss":class_loss, 
+                #     "Verifier accuracy":Verifier_acc,
+                #     "Examples" : [self.wandb.Image(i) for i in inputs]})
 
                 if local_rank==0:
                     if iteration % save_every==0:
